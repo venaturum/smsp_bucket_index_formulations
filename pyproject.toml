@@ -1,0 +1,32 @@
+# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "smsp_bi"
+version = "0.1.0"
+description = "Implementations for BI and TI models for SMSP"
+readme = "README.md"
+authors = ["Riley Clement <rileyclement@gmail.com>"]
+maintainers = ["Riley Clement <rileyclement@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+gurobipy = ">=9.5.1"
+numpy = ">=1"
+PuLP =">=2.6"
+
+
+[tool.poetry.dev-dependencies]
+ipykernel = "^5"
+isort = ">=5.8"
+black = {version = "*", python = "^3.6.2"}
+flake8 = ">=3.9"
+
+[tool.isort]
+# make it compatible with black
+profile = "black"
+multi_line_output = 3
+src_paths = ["."]
