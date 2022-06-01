@@ -199,7 +199,7 @@ class BI_2(base.BI_2):
         )
 
 
-class BI_slim(BI):
+class BI_2_slim(BI_2):
     def _setup(self):
         super()._setup()
         self._setup_slim()

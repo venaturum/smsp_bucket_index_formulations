@@ -5,7 +5,7 @@ from smsp_bi import base
 from smsp_bi.utils import Schedule, irange
 
 
-class BI2(base.BI_2):
+class BI_2(base.BI_2):
     def __init__(self, smsp, name="BI_2"):
         self.m = gp.Model(name)
         self.m.setAttr("ModelSense", GRB.MINIMIZE)
@@ -172,7 +172,7 @@ class BI2(base.BI_2):
         )
 
 
-class BI_slim(BI):
+class BI_2_slim(BI_2):
     def _setup(self):
         super()._setup()
         self._setup_slim()
