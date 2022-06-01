@@ -47,7 +47,7 @@ $$
   & \Delta u_{jbk} \leq (\Delta - k\pi_j^{\Delta}) z_{jbk}, & \ & j \in J,\ k \in K_j,\ b \in
   [1, B-P_j+1],
   \\
-  & z_{jbk} \in \{0, 1\}, & \ & j \in J,\ k \in K_j,\ b \in [1, B-P_j+1].
+  & z_{jbk} \in \lbrace 0, 1 \rbrace, & \ & j \in J,\ k \in K_j,\ b \in [1, B-P_j+1].
 \end{alignat}
 $$
 

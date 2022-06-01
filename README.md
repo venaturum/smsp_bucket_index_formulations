@@ -3,7 +3,7 @@
 The code in this repository provides implementations (with either PuLP or gurobipy) for Bucket Index (BI) formulations, and Time Index (TI) formulation for the (non-preemptive) Single Machine Scheduling Problem.
 
 The single machine scheduling problem is a classical optimisation problem that has been extensively studied.  An instance of this problem consists of
-$n$ jobs and a processing time $p_j$ for each job $j \in J = \{ 1, \ldots, n \}$. A schedule is a set of start times, or equivalently
+$n$ jobs and a processing time $p_j$ for each job $j \in J = \lbrace 1, \ldots, n \rbrace$. A schedule is a set of start times, or equivalently
 completion times, for the jobs on a machine that is able to process no more than one job at a time. In the nonpreemptive version of the
 problem, each job $j$ must receive uninterrupted processing for an interval of length $p_j$. The performance of a
 schedule is typically evaluated against a standard min-sum or min-max criteria and there may exist additional restrictions on each job $j$
@@ -37,6 +37,21 @@ If certain conditions are satisfied by the problem data then a BI-n model can be
 Finally, the BI-* model generalises all of the above models.  It is "a hybrid" of the BI-n, BI-3-V and BI-2-V models, in which each bucket in the time horizon belongs to one of three classes that differ according to the number of jobs permitted to start in the bucket.
 
 
+*Note:* the BI-2 model is referred to as *"the BI model"* in the following paper:
+
+[Natashia Boland, Riley Clement, Hamish Waterer.<br/>
+A Bucket Indexed Formulation for Nonpreemptive Single Machine Scheduling Problems.<br/>
+INFORMS Journal on Computing. 2016.](https://doi.org/10.1287/ijoc.2015.0661)
+
+A corrigendum to this paper, to correct a typo in the constraints for modelling weighted tardiness was later published:
+
+[Natashia Boland, Riley Clement, Hamish Waterer
+Corrigendum to “A Bucket Indexed Formulation for Nonpreemptive Single Machine Scheduling Problems,”
+INFORMS Journal on Computing. 2020.](https://doi.org/10.1287/ijoc.2020.0979)
+
+This correction features in the below formulation for the BI-2 model.
+
+
 ### Install
 
 Available as a python package `smsp_bi` which can be installed with pip:
@@ -47,7 +62,7 @@ or with poetry (place the following dependency in pyproject.toml)
 
     smsp_bi = { git = "https://github.com/venaturum/smsp_bucket_index_formulations.git", rev = "main"}
 
-Example usage can be found in *example.ipynb*.
+Example usage can be found in [*example.ipynb*](example.ipynb).
 
 
 
@@ -66,7 +81,7 @@ The classical time indexed (TI) integer linear programming model is one of the m
 In the TI model the planning horizon consists of $T$ periods in which period $t$ starts at time $t-1$ and ends at time $t$. Specifically, period $t$ corresponds to the right  half-open real interval $[t-1, t)$. 
 The objective function is linear in the binary variables, with $c_{jt}$ being the cost incurred of starting job $j$ at the start of period $t$ (i.e. at time $t-1$).
 
-For convenience, let $[t_1, t_2]$ denote the set $\lbrace t_{1}, \ldots, t_{2}\} \cap \{1, \ldots , T\rbrace$ of periods where the set $[t_{1}, t_{2}] = \emptyset$ if period $t_{1} > t_{2}$.
+For convenience, let $[t_1, t_2]$ denote the set $\lbrace t_{1}, \ldots, t_{2} \rbrace \cap \lbrace 1, \ldots , T\rbrace$ of periods where the set $[t_{1}, t_{2}] = \emptyset$ if period $t_{1} > t_{2}$.
 
 $$
 \begin{alignat}{2}
@@ -78,7 +93,7 @@ $$
   & \sum_{j \in J} \sum_{s \in [t-p_j+1, t]} x_{js} \leq 1, & \quad &
   t \in [1, T],
   \\
-  & x_{jt} \in \{0, 1\}, & \quad & j \in J,\ t \in [1, T-p_j+1].
+  & x_{jt} \in \lbrace 0, 1 \rbrace, & \quad & j \in J,\ t \in [1, T-p_j+1].
 \end{alignat}
 $$
 
@@ -88,7 +103,7 @@ For the BI-2 model (and BI-3 model) the planning horizon is divided into $B$ buc
 
 A job is said to span $m$ buckets if its start time lies in the interval corresponding to bucket $b$ and its end time lies in the interval corresponding to bucket $b + m - 1$.  In the BI-2 formulation the length of each bucket $\Delta$ is chosen to be an integer number of periods no larger than the processing time of the shortest job.  Choosing a bucket size of this length ensures that each job spans at least two buckets, and at most one job can start in each bucket.
 
-Let $P_j, \pi_j, D_j$ and $\delta_j$ be uniquely defined for each job $j$ by $p_j$ and $\Delta$, using the following:
+Let $P_j, \pi_j, D_j$ and $\delta_j$ be uniquely defined for each job $j$ by $p_j$, $d_j$ and $\Delta$, using the following:
 
 $$
 \begin{alignat}{4}
@@ -99,15 +114,14 @@ $$
 \end{alignat}
 $$
 
-In general, if a job $j \in J$ starts processing at time $s_j$ in bucket $S_j$ then it will complete processing at time $s_j + p_j$ in bucket $S_j + P_j + k_j - 1$ where $k_j \in \{0, 1\}$. The job will span $P_j + k_j$ buckets if and only if $1 - k_j < \sigma_j + \pi_j \leq 2 - k_j$. If $\sigma_j$ is the fraction of bucket $S_j$ used in processing the job then the fraction of bucket $S_j + P_j + k_j - 1$ used is $p_j/\Delta - \sigma_j - (P_j + k_j - 2) = 2 - k_j - \pi_j - \sigma_j \geq 0$.  
+In general, if a job $j \in J$ starts processing at time $s_j$ in bucket $S_j$ then it will complete processing at time $s_j + p_j$ in bucket $S_j + P_j + k_j - 1$ where $k_j \in \lbrace 0, 1 \rbrace$. The job will span $P_j + k_j$ buckets if and only if $1 - k_j < \sigma_j + \pi_j \leq 2 - k_j$. If $\sigma_j$ is the fraction of bucket $S_j$ used in processing the job then the fraction of bucket $S_j + P_j + k_j - 1$ used is $p_j/\Delta - \sigma_j - (P_j + k_j - 2) = 2 - k_j - \pi_j - \sigma_j \geq 0$.  
 
 <p align="center">
   <img src="img/notation.png" alt="The notation used in the BI-2 framework."/>
 </p>
 
 
-The BI-2 formulation is a mixed integer linear program with binary variables $z_{jbk}$ and continuous variables $u_{jbk}$ and $v_{jbk}$ for all jobs $j \in J$, buckets $b \in [1, B]$, and indices $k \in K = \{0, 1\}$.
-If $z_{jbk} = 1$ then job $j$ starts in bucket $b$ and spans $P_j + k$ buckets, and $z_{jbk} = 0$ otherwise. In the grid shown below, a variable of this type is defined for each (job-dependent) part of a bucket enclosed by vertical lines (one dashed, one solid). The bucket size $\Delta$ has been chosen to be 6 - less than the minimum processing time of 7.  There are three buckets in the grid, so for each job in this example, there are six binary variables. For the second job (that with processing time 10), variable $z_{2,3,0}=1$ is defined to mean that this job starts in the first part of the third bucket, i.e. within the time interval $[12,14)$ while variable $z_{2,1,1}=1$ is defined to mean that this job starts in the second part of the first bucket, i.e. within the time interval $[2,6)$.
+The BI-2 formulation is a mixed integer linear program with binary variables $z_{jbk}$ and continuous variables $u_{jbk}$ and $v_{jbk}$ for all jobs $j \in J$, buckets $b \in [1, B]$, and indices $k \in K = \lbrace 0, 1 \rbrace$.  If $z_{jbk} = 1$ then job $j$ starts in bucket $b$ and spans $P_j + k$ buckets, and $z_{jbk} = 0$ otherwise. In the grid shown below, a variable of this type is defined for each (job-dependent) part of a bucket enclosed by vertical lines (one dashed, one solid). The bucket size $\Delta$ has been chosen to be 6 - less than the minimum processing time of 7.  There are three buckets in the grid, so for each job in this example, there are six binary variables. For the second job (that with processing time 10), variable $z_{2,3,0}=1$ is defined to mean that this job starts in the first part of the third bucket, i.e. within the time interval $[12,14)$ while variable $z_{2,1,1}=1$ is defined to mean that this job starts in the second part of the first bucket, i.e. within the time interval $[2,6)$.
 
 <p align="center">
   <img src="img/BIframework.png" alt="The BI-2 framework."/>
@@ -148,7 +162,7 @@ $$
   & v_{j, b+P_j+k-1, k} \leq (1 - k\pi_j - \frac{1}{\Delta}) z_{jbk},
   & \ & j \in J,\ k \in K,\ b \in [1, B],
   \\
-  & z_{jbk} \in \{0, 1\}, & \ & j \in J,\ k \in K,\ b \in [1, B].
+  & z_{jbk} \in \lbrace 0, 1 \rbrace, & \ & j \in J,\ k \in K,\ b \in [1, B].
 \end{alignat}
 $$
 
@@ -192,6 +206,6 @@ Note that the variables $T_{j D_j 0}$ are only defined if $1-\pi_j < \delta_j$ f
 
 ### TODO
 
-- Add cut separation algorithm
 - Add BI-3 formulation
 - Add BI-n formulation
+- Add cut separation algorithm
