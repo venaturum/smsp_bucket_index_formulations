@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from smsp_bi.utils import irange
 
 
-class BI(ABC):
+class BI_2(ABC):
     def __init__(self, smsp):
         # smsp is SMSP object
         self.smsp = smsp.copy()

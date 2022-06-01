@@ -4,8 +4,8 @@ from smsp_bi import base
 from smsp_bi.utils import Schedule, irange
 
 
-class BI(base.BI):
-    def __init__(self, smsp, name="BI"):
+class BI_2(base.BI_2):
+    def __init__(self, smsp, name="BI_2"):
         self.m = pulp.LpProblem(name, pulp.LpMinimize)
         super().__init__(smsp)
 
