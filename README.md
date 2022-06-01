@@ -9,33 +9,30 @@ problem, each job $j$ must receive uninterrupted processing for an interval of l
 schedule is typically evaluated against a standard min-sum or min-max criteria and there may exist additional restrictions on each job $j$
 such as a release date $r_j$, a due date $d_j$, or a deadline $\bar{d}_j$.
 
-The BI formulations provided in this repository are taken from 
+The BI formulations provided in this repository are taken from the following thesis,
 
 [Clement, Riley.<br/>
 Mixed Integer Linear Programming Models for Machine Scheduling.<br/>
 PhD thesis.  University of Newcastle. 2015.](https://hdl.handle.net/1959.13/1310105)
 
-and represent a family of MILP models of which all, but one, generalise the classic TI model:
+and represent a family of Mixed Integer Linear Programming models of which all, but one, generalise the classic TI model:
 
 
 <p align="center">
   <img src="img/tibb_heirarchy.png" alt="The heirarchy of BI formulations"/>
 </p>
 
-The BI-2 model is a generalisation of the TI model to one in which at most two jobs can be processing in each time period.
-The BI-3 model is a generalisation of the BI-2 model to one in which at most three jobs can be processing in each time period.
+Every one of these models relies on the notion of dividing the planning horizon into a finite set of time periods.
+
+The BI-2 model is a generalisation of the TI model to one in which at most two jobs can be processing in each time period.  The BI-3 model is a generalisation of the BI-2 model to one in which at most three jobs can be processing in each time period.
 Like the TI model, these two BI models are an exact formulation that divides the planning horizon into time periods, which are referred to as buckets, of equal length. Unlike the TI model, the length of a
 period is a parameter of the models.  For the BI-2 model the length of a period can be up to, and including, the processing time of the shortest job. For the BI-3 model the length of a period can be up to, and including, the sum of processing times of the two shortest jobs.
 
-If the period is of unit length then the TI, BI-2 and BI-3 models are equivalent.
-When longer periods are used, the BI models can have significantly fewer variables and nonzeros than
-the corresponding TI model, at the expense of a greater number of constraints - the vast majority of which are
-are tight simple variable bounds.
+If the period is of unit length then the TI, BI-2 and BI-3 models are equivalent.  When longer periods are used, the BI models can have significantly fewer variables and nonzeros than the corresponding TI model, at the expense of a greater number of constraints - the vast majority of which are are tight simple variable bounds.
 
 The BI-2-V and BI-3-V generalise the BI-2 and BI-3 models respectively to ones in which the buckets can be variable length. The bucket sizes must still be chosen to ensure at most two and three jobs respectively can be processed in each bucket, however release dates and deadlines can utilised to define how the upper bound on bucket size may change over the time horizon.
 
-If certain conditions are satisfied then a BI-n model can be formulated in which a
-bucket may permit an arbitrary number of jobs to start within it.
+If certain conditions are satisfied by the problem data then a BI-n model can be formulated in which a bucket may permit an arbitrary number of jobs to start within it.
 
 Finally, the BI-* model generalises all of the above models.  It is "a hybrid" of the BI-n, BI-3-V and BI-2-V models, in which each bucket in the time horizon belongs to one of three classes that differ according to the number of jobs permitted to start in the bucket.
 
@@ -56,7 +53,7 @@ Example usage can be found in *example.ipynb*.
 
 ## Models
 
-The models are described below as they are presented in the thesis.  The implementation of these models in practice differs; scaling constraints and, in particular, avoiding coefficients that arise by division of bucket length to lower the risk of numerical issues in the solver.  Additionally, certain classes of redundant variables are not created.  Description of the subsequent models can be found [here](Implementations.md)
+The models are described below as they are presented in the thesis.  The implementation of these models in practice differs through scaling constraints and, in particular, avoiding coefficients that arise by division of bucket length to lower the risk of numerical issues in the solver.  Additionally, certain classes of redundant variables are not created.  Description of the subsequent models can be found [here](Implementations.md)
 
 In the following models the problem data is integer and the length of the planning horizon is of sufficient length to admit a feasible schedule.
 
@@ -64,12 +61,12 @@ In the following models the problem data is integer and the length of the planni
 
 ### TI Model
 
-The classical time indexed (TI) integer linear programming model is one of the most well studied mixed integer linear programming formulations for nonpreemptive single machine scheduling problems. The problem data is assumed to be integer and a sufficiently large planning horizon is discretised into time periods of unit length. Binary variables, $x$ are defined for each job and each period to model whether or not the job starts at the beginning of the period.  The TI model's single biggest shortcoming is its size. The length of the planning horizon is pseudopolynomial in the size of the problem input, so for instances involving many jobs and long processing times, the TI model may be intractable due to its large number of variables and constraints.
+The classical time indexed (TI) integer linear programming model is one of the most well studied mixed integer linear programming formulations for nonpreemptive single machine scheduling problems. The time periods which divide the planning horizon are of unit length. Binary variables, $x$ are defined for each job and each period to model whether or not the job starts at the beginning of the period.  The TI model's single biggest shortcoming is its size. The length of the planning horizon is pseudopolynomial in the size of the problem input, so for instances involving many jobs and long processing times, the TI model may be intractable due to its large number of variables and constraints.
 
 In the TI model the planning horizon consists of $T$ periods in which period $t$ starts at time $t-1$ and ends at time $t$. Specifically, period $t$ corresponds to the right  half-open real interval $[t-1, t)$. 
 The objective function is linear in the binary variables, with $c_{jt}$ being the cost incurred of starting job $j$ at the start of period $t$ (i.e. at time $t-1$).
 
-For convenience, let $[t_1, t_2]$ denote the set $\{t_{1}, \ldots, t_{2}\} \cap \{1, \ldots , T\}$ of periods where the set $[t_{1}, t_{2}] = \emptyset$ if period $t_{1} > t_{2}$.
+For convenience, let $[t_1, t_2]$ denote the set $\lbrace t_{1}, \ldots, t_{2}\} \cap \{1, \ldots , T\rbrace$ of periods where the set $[t_{1}, t_{2}] = \emptyset$ if period $t_{1} > t_{2}$.
 
 $$
 \begin{alignat}{2}
@@ -87,11 +84,11 @@ $$
 
 ### BI-2 Model
 
-For the BI models the planning horizon is divided into $B$ buckets of $\Delta$ periods such that $(B-1)\Delta < T \leq B\Delta$.  Specifically, bucket $b$ corresponds to the right half-open real interval $[(b-1)\Delta, b\Delta)$ that starts with period $(b-1)\Delta+1$ and ends with period $b\Delta$.  If $\tau \in [0, T)$ is an instant in time, then by definition time $\tau$ is contained in period $t = \lfloor \tau \rfloor + 1$ which lies in bucket $b = \lfloor \tau/\Delta \rfloor + 1$. 
+For the BI-2 model (and BI-3 model) the planning horizon is divided into $B$ buckets of $\Delta$ periods such that $(B-1)\Delta < T \leq B\Delta$.  Specifically, bucket $b$ corresponds to the right half-open real interval $[(b-1)\Delta, b\Delta)$ that starts with period $(b-1)\Delta+1$ and ends with period $b\Delta$.  If $\tau \in [0, T)$ is an instant in time, then by definition time $\tau$ is contained in period $t = \lfloor \tau \rfloor + 1$ which lies in bucket $b = \lfloor \tau/\Delta \rfloor + 1$. 
 
 A job is said to span $m$ buckets if its start time lies in the interval corresponding to bucket $b$ and its end time lies in the interval corresponding to bucket $b + m - 1$.  In the BI-2 formulation the length of each bucket $\Delta$ is chosen to be an integer number of periods no larger than the processing time of the shortest job.  Choosing a bucket size of this length ensures that each job spans at least two buckets, and at most one job can start in each bucket.
 
-Let $P_j, \pi_j, D_j$ and $\delta_j$ be uniquely defined for each job $j$ by $p_j$ and $\Delta$, as follows:
+Let $P_j, \pi_j, D_j$ and $\delta_j$ be uniquely defined for each job $j$ by $p_j$ and $\Delta$, using the following:
 
 $$
 \begin{alignat}{4}
@@ -110,7 +107,7 @@ In general, if a job $j \in J$ starts processing at time $s_j$ in bucket $S_j$ t
 
 
 The BI-2 formulation is a mixed integer linear program with binary variables $z_{jbk}$ and continuous variables $u_{jbk}$ and $v_{jbk}$ for all jobs $j \in J$, buckets $b \in [1, B]$, and indices $k \in K = \{0, 1\}$.
-If $z_{jbk} = 1$ then job $j$ starts in bucket $b$ and spans $P_j + k$ buckets, and $z_{jbk} = 0$ otherwise. In the grid shown below, a variable of this type is defined for each (job-dependent) part of a bucket enclosed by vertical lines (one dashed, one solid). So for each job in this example, there are six binary variables. For the second job (that with processing time 10), variable $z_{231}=1$ is defined to mean that this job starts in the first part of the third bucket, i.e. within the time interval $[12,14)$ while variable $z_{212}=1$ is defined to mean that this job starts in the second part of the first bucket, i.e. within the time interval $[2,6)$.
+If $z_{jbk} = 1$ then job $j$ starts in bucket $b$ and spans $P_j + k$ buckets, and $z_{jbk} = 0$ otherwise. In the grid shown below, a variable of this type is defined for each (job-dependent) part of a bucket enclosed by vertical lines (one dashed, one solid). The bucket size $\Delta$ has been chosen to be 6 - less than the minimum processing time of 7.  There are three buckets in the grid, so for each job in this example, there are six binary variables. For the second job (that with processing time 10), variable $z_{2,3,0}=1$ is defined to mean that this job starts in the first part of the third bucket, i.e. within the time interval $[12,14)$ while variable $z_{2,1,1}=1$ is defined to mean that this job starts in the second part of the first bucket, i.e. within the time interval $[2,6)$.
 
 <p align="center">
   <img src="img/BIframework.png" alt="The BI-2 framework."/>
@@ -155,7 +152,16 @@ $$
 \end{alignat}
 $$
 
+For an exposition of these constraints please consult the thesis linked above.
+
+Note that, with respect to the objective function above, $c$ is a vector representing cost, which is dependent on the scheduling criteria.  With the exception of weighted tardiness, all standard min-sum scheduling criteria can be modelled using this objective function since they are linear in the bucket in variables.  For example, to model weighted start time, which is equivalent to modelling weighted completion time since the two criteria differ by a constant, choose $c_{jb}^z = w_j b \Delta$, $c_{jb}^u = -w_j \Delta$, and $c_{jb}^v = 0$ for all jobs $j \in J$ and buckets $b \in [1, B]$.
+
+The variables and constraints required to model weighted tardiness are introduced below.
+
+
 #### Capturing weighted tardiness
+
+Weighted tardiness is linear in all but possibly the pair of bucket indexed variables corresponding to the bucket the due date of each job falls in, in which case it is piecewise linear. To model weighted tardiness the variables $T_{jbk}$ are introduced for all jobs $j \in J$, buckets $b \in [D_j, B]$, and indices $k \in K$.   The objective and constraints are the following:
 
 $$
 \begin{alignat}{2}
@@ -181,6 +187,8 @@ $$
   J,\ k \in K,\ b \in [D_j + 1, B].
 \end{alignat}
 $$
+
+Note that the variables $T_{j D_j 0}$ are only defined if $1-\pi_j < \delta_j$ for $j \in J$ and the variables $T_{jbk}$ are redundant for all jobs $j \in J$, buckets $b \in [D_j + 1, B]$, and indices $k \in K$, and can be eliminated.
 
 ### TODO
 
